@@ -142,3 +142,7 @@ Keeping a sorted structure **in memory** is easy: use a balanced tree such as a 
 6. Why are lookups for missing keys slow, and how does a Bloom filter help?
 7. Size-tiered vs leveled compaction: what's the difference, and who uses which?
 8. When would you choose an LSM-tree over a B-tree?
+
+## 9. In simple words: how it all fits together
+
+An **LSM-tree** is the whole storage design, not just the tree in memory. **Writes** are first appended to a **WAL** on disk for crash safety, then inserted into the **memtable**, a balanced tree (red-black or AVL) in RAM that keeps keys sorted. When the memtable grows past a few MB, it is **flushed** to disk as a new **SSTable**, a sorted, immutable file, and a fresh memtable takes new writes. Each flush creates a new SSTable; SSTables never "fill up". **Reads** check the memtable, then SSTables from **newest to oldest**, and the newest value wins. **Compaction** merges SSTables in the background and drops old values and tombstones. A **sparse index** keeps a few keys per SSTable with their file offsets, so you jump close to the key and scan a little. A **Bloom filter** tells you when a key is **definitely not** in an SSTable ("maybe here" otherwise), which skips useless disk reads. Memtable = RAM, SSTables = disk, LSM-tree = the whole thing.
