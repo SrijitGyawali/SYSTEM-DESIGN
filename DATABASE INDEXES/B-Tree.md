@@ -118,3 +118,7 @@ Several threads updating pages in place could see the tree in a half-updated sta
 4. Why do you need a WAL? What can go wrong without one?
 5. Why do LSM-trees need less concurrency control than B-trees?
 6. How much data can a 4-level tree with branching factor 500 hold?
+
+## 9. In simple words: how it all fits together
+
+A **B-tree** splits the database into fixed-size **pages** (about 4 KB) on disk, arranged as a tree. Each interior page holds **sorted keys and references to child pages**, and each child covers one range of keys. **Leaf pages** hold the actual values. A lookup starts at the root and follows the right reference at each level until it reaches a leaf, which takes **O(log n)** page reads, usually 3–4. The number of child references per page is the **branching factor** (not "balancing factor"), typically several hundred. Updates **overwrite the page in place**. If an insert finds its page full, the page **splits** in two and the parent gets a new boundary key. Splits can travel up to the root, and the tree grows from the top, so **all leaves always stay at the same depth** (stricter than the AVL rule that heights differ by at most 1). The 4 KB page size doesn't make the tree balanced; the splits do. A **WAL** protects against crashes during multi-page writes, and **latches** protect against threads seeing a half-updated tree. Unlike an LSM-tree, which never edits files and only appends, a B-tree edits pages in place. That makes reads predictable but writes slower.
