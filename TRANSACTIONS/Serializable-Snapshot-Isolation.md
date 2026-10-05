@@ -94,3 +94,20 @@ Txn 43: COMMIT → 42's conflicting write has already committed → ABORT ❌
 - The database only needs to remember this until the transaction **and all transactions running at the same time** have finished.
 - When a transaction **writes**, it looks in the index for other transactions that recently **read** the affected data. Instead of blocking, it **notifies** them that their data may be out of date.
 - The **first transaction to commit wins**. The later one aborts and must retry.
+
+## 8. Performance of SSI
+
+**Trade-off: how precisely to track reads and writes**
+- **Detailed tracking** gives precise aborts but adds **bookkeeping overhead**.
+- **Coarse tracking** is faster but causes **more unnecessary aborts**.
+- PostgreSQL uses theory to prove that some executions are still serializable even after reading overwritten data, which **reduces unnecessary aborts**.
+
+| Compared to | SSI's advantage |
+|---|---|
+| **2PL** | **No waiting on locks.** Writers don't block readers and readers don't block writers, so **latency is predictable**. Read-only queries need **no locks at all**, which suits read-heavy workloads |
+| **Serial execution** | **Not limited to one CPU core.** FoundationDB spreads conflict detection over many machines, and transactions can span **several partitions** while staying serializable |
+
+**The main limitation is the abort rate.**
+- Long **read-write** transactions are likely to conflict and abort, so read-write transactions should be **short**.
+- Long **read-only** transactions are usually fine.
+- SSI is still **less sensitive to slow transactions** than 2PL or serial execution.
