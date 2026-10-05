@@ -111,3 +111,15 @@ Txn 43: COMMIT → 42's conflicting write has already committed → ABORT ❌
 - Long **read-write** transactions are likely to conflict and abort, so read-write transactions should be **short**.
 - Long **read-only** transactions are usually fine.
 - SSI is still **less sensitive to slow transactions** than 2PL or serial execution.
+
+## 9. The three ways to get serializability
+
+| | Actual serial execution | Two-phase locking (2PL) | SSI |
+|---|---|---|---|
+| Type | Pessimistic (extreme) | Pessimistic | **Optimistic** |
+| How it works | One transaction at a time on a single thread | Shared/exclusive locks held until commit, plus predicate or index-range locks | Snapshot isolation plus conflict detection at commit |
+| Blocking | Everything waits in one queue | Readers and writers block each other | **No blocking** |
+| Conflicts handled by | They can't happen | Waiting (plus deadlock aborts) | **Aborting** at commit |
+| Scaling | Only with clean partitioning | Yes, but contention hurts | ✅ Yes (FoundationDB) |
+| Weak spot | Slow transactions, cross-partition writes | Unstable latency, deadlocks | High contention causes many aborts |
+| Used by | VoltDB, Redis, Datomic | MySQL InnoDB and SQL Server (serializable), DB2 (repeatable read) | PostgreSQL (serializable, 9.1+), FoundationDB |
