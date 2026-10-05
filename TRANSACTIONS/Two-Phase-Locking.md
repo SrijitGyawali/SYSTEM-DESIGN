@@ -86,3 +86,23 @@ This is why not everyone has used 2PL since the 1970s: **throughput and query re
 | **No limit on waiting** | Traditional databases allow long, interactive transactions, so a wait can last a long time. **Queues** form behind a popular object |
 | **Unstable latency** | Very slow at **high percentiles** (e.g. p99) when there's contention. One slow transaction, or one that locks a lot of data, can make the whole system **grind to a halt** |
 | **Deadlock retries** | Aborted transactions must redo all their work |
+
+## 7. Predicate locks: stopping phantoms
+
+Row locks can't lock rows that **don't exist yet** (see [phantoms](Write-Skew-and-Phantoms.md#6-phantoms)). Serializable isolation must prevent phantoms anyway.
+
+A **predicate lock** belongs to **every object matching a search condition**, not to one row:
+
+```sql
+SELECT * FROM bookings
+  WHERE room_id = 123
+    AND end_time   > '2018-01-01 12:00'
+    AND start_time < '2018-01-01 13:00';
+```
+
+- **Reading with a condition:** take a **shared predicate lock** on that condition. Wait if another transaction holds an exclusive lock on any matching object.
+- **Inserting, updating or deleting:** first check whether the **old or new value matches any existing predicate lock**. If another transaction holds one, **wait** until it commits or aborts.
+
+**Key idea:** a predicate lock also covers objects that **might be added in the future**. 2PL + predicate locks = **true serializability**, with no write skew and no phantoms.
+
+Bookings for other rooms, or for room 123 at a different time, can still go ahead concurrently.
