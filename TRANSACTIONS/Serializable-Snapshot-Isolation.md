@@ -123,3 +123,11 @@ Txn 43: COMMIT → 42's conflicting write has already committed → ABORT ❌
 | Scaling | Only with clean partitioning | Yes, but contention hurts | ✅ Yes (FoundationDB) |
 | Weak spot | Slow transactions, cross-partition writes | Unstable latency, deadlocks | High contention causes many aborts |
 | Used by | VoltDB, Redis, Datomic | MySQL InnoDB and SQL Server (serializable), DB2 (repeatable read) | PostgreSQL (serializable, 9.1+), FoundationDB |
+
+## 10. Conclusion
+
+**Serializable snapshot isolation** gives full serializability at close to the speed of snapshot isolation. It's **optimistic**: transactions read from an MVCC snapshot and run **without blocking**, and at **commit** the database checks whether the transaction acted on an **outdated premise**. It catches two cases. One is a **stale MVCC read**, where a write it ignored has since committed. The other is a **write after its read**, caught by index-based **tripwires** that notify instead of block. If either happened, the transaction **aborts** and is retried. Compared with 2PL, it has predictable latency and lock-free reads. Compared with serial execution, it scales across cores and machines. Its weak spot is **high contention**, where aborts pile up, so read-write transactions should stay short. It's used by PostgreSQL's serializable level and by FoundationDB.
+
+### Interview one-liners
+- **SSI:** "Optimistic concurrency control. Transactions run on a snapshot without locks, and at commit the database aborts any transaction whose reads were invalidated by a committed write. Serializable with little overhead, but it struggles under high contention."
+- **Pessimistic vs optimistic:** "Pessimistic waits whenever a conflict is possible, like 2PL. Optimistic carries on and checks at commit, aborting if there was a conflict, like SSI."
