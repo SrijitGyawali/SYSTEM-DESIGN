@@ -26,3 +26,20 @@ Ordinary row locks (as in read committed) only make **writers wait for writers**
 | Reads old versions? | Yes (MVCC) | No, it waits instead |
 | Prevents lost updates? | Some databases detect them | ✅ Yes |
 | Prevents write skew and phantoms? | ❌ No | ✅ Yes, all race conditions |
+
+## 3. Implementation: shared and exclusive locks
+
+Used by the **serializable** level in **MySQL (InnoDB)** and **SQL Server**, and the **repeatable read** level in **DB2**.
+
+Every object in the database has a lock, which can be held in one of two modes:
+
+- **To read**, take the lock in **shared mode**. Many transactions can share it, but they wait if someone holds it in exclusive mode.
+- **To write**, take the lock in **exclusive mode**. Wait if anyone holds it in any mode.
+- **To read and then write**, **upgrade** the shared lock to exclusive. This works the same as taking an exclusive lock directly.
+- **Hold every lock until the transaction ends** (commit or abort).
+
+| Lock already held ↓ · Lock requested → | Shared (read) | Exclusive (write) |
+|---|---|---|
+| **None** | ✅ Granted | ✅ Granted |
+| **Shared** | ✅ Granted | ⏳ Wait |
+| **Exclusive** | ⏳ Wait | ⏳ Wait |
