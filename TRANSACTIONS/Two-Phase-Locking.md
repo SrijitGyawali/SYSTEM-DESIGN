@@ -106,3 +106,24 @@ SELECT * FROM bookings
 **Key idea:** a predicate lock also covers objects that **might be added in the future**. 2PL + predicate locks = **true serializability**, with no write skew and no phantoms.
 
 Bookings for other rooms, or for room 123 at a different time, can still go ahead concurrently.
+
+## 8. Index-range locks (next-key locking): the practical version
+
+Predicate locks are **slow**: checking every write against many active predicates takes time. So most 2PL databases use **index-range locking**, a simpler **approximation**.
+
+**The safe trick:** lock a **bigger** set of objects than needed. Any write that matches the original predicate also matches the bigger one.
+
+| Exact predicate | Approximation | Where the lock goes |
+|---|---|---|
+| Room 123, noon–1pm | Room 123, **any time** | The `room_id = 123` entry in the room index |
+| Room 123, noon–1pm | **All rooms**, noon–1pm | A range of values in the time index |
+
+- The shared lock is attached to the **index the query used**.
+- Another transaction that wants to insert, update or delete a booking for that room or time must **update the same part of the index**. It hits the shared lock and **waits**.
+- **No suitable index?** Fall back to a **shared lock on the whole table**. This is safe but slow, because it blocks every writer to that table.
+
+| | Predicate lock | Index-range lock |
+|---|---|---|
+| Precision | Exact | Locks more than needed |
+| Overhead | High | **Low** |
+| Used in practice | Rarely | **Most 2PL databases** |
