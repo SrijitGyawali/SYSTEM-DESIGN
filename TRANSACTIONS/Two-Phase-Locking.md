@@ -135,3 +135,10 @@ Predicate locks are **slow**: checking every write against many active predicate
 - It works like a **mutex** (mutual exclusion) in multi-threaded programming.
 - [Actual serial execution](Actual-Serial-Execution.md) is pessimistic **to the extreme**. It's like each transaction holding an exclusive lock on the **whole database** (or partition). It makes up for this by keeping every transaction very fast.
 - The **optimistic** alternative is **SSI** → [Serializable-Snapshot-Isolation.md](Serializable-Snapshot-Isolation.md).
+
+## 10. Conclusion
+
+**Two-phase locking** makes transactions serializable by locking. Reads take **shared** locks and writes take **exclusive** locks, and every lock is held **until commit or abort** (phase 1 acquires, phase 2 releases). Unlike snapshot isolation, **writers block readers and readers block writers**, so lost updates, write skew and phantoms are all prevented. Phantoms need **predicate locks**, which in practice are approximated by cheaper **index-range (next-key) locks**, with a whole-table lock as the fallback. The cost is **performance**: less concurrency, queues behind hot rows, unstable p99 latency, and frequent **deadlocks** that force retries. It's the classic **pessimistic** approach, used for serializable isolation in MySQL InnoDB and SQL Server.
+
+### Interview one-liner
+> "2PL takes shared locks for reads and exclusive locks for writes and holds them until commit, so readers and writers block each other. Predicate or index-range locks stop phantoms. It's fully serializable but slow, with deadlocks and unpredictable latency."
