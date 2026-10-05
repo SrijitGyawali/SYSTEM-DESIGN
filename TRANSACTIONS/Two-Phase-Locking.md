@@ -127,3 +127,11 @@ Predicate locks are **slow**: checking every write against many active predicate
 | Precision | Exact | Locks more than needed |
 | Overhead | High | **Low** |
 | Used in practice | Rarely | **Most 2PL databases** |
+
+## 9. 2PL is pessimistic concurrency control
+
+> **Pessimistic:** "If anything *might* go wrong (another transaction holds a lock), **wait** until it's safe before doing anything."
+
+- It works like a **mutex** (mutual exclusion) in multi-threaded programming.
+- [Actual serial execution](Actual-Serial-Execution.md) is pessimistic **to the extreme**. It's like each transaction holding an exclusive lock on the **whole database** (or partition). It makes up for this by keeping every transaction very fast.
+- The **optimistic** alternative is **SSI** → [Serializable-Snapshot-Isolation.md](Serializable-Snapshot-Isolation.md).
