@@ -43,3 +43,20 @@ Every object in the database has a lock, which can be held in one of two modes:
 | **None** | ✅ Granted | ✅ Granted |
 | **Shared** | ✅ Granted | ⏳ Wait |
 | **Exclusive** | ⏳ Wait | ⏳ Wait |
+
+## 4. Why it's called "two-phase"
+
+```
+ locks held
+   ▲
+   │          ┌──────────────┐
+   │       ┌──┘              │
+   │    ┌──┘                 │   ← all released at once
+   │ ┌──┘                    │
+   └─┴───────────────────────┴──────▶ time
+     Phase 1: acquire locks     Phase 2: commit/abort,
+     while executing            release every lock
+```
+
+1. **Phase 1:** while the transaction runs, it **acquires** locks and never releases any.
+2. **Phase 2:** at the end (commit or abort), it **releases all** of them.
