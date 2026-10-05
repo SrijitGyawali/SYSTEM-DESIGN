@@ -45,6 +45,7 @@ COMMIT;
 
 - **How:** locks (2PL), **MVCC** snapshots (readers don't block writers), **SSI** (optimistic: abort on conflict).
 - Stronger isolation is **safer but slower**.
+- Deep dives: [Read committed](Read-Committed-Isolation.md) · [Snapshot isolation](Snapshot-Isolation.md) · [Write skew & phantoms](Write-Skew-and-Phantoms.md) · [Actual serial execution](Actual-Serial-Execution.md) · [Two-phase locking](Two-Phase-Locking.md) · [SSI](Serializable-Snapshot-Isolation.md)
 
 ## D — Durability: committed data survives
 - Once the database says "COMMIT OK", a crash or power loss won't lose the data.
