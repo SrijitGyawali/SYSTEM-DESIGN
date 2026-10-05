@@ -74,3 +74,15 @@ Txn B: holds lock on Y, wants X  ──▶ waits for A
 - The database **detects deadlocks automatically** and **aborts one** of the transactions so the others can continue.
 - The **application must retry** the aborted transaction.
 - Deadlocks can happen with lock-based read committed too, but they happen **much more often under 2PL**. Each retry redoes all the work, so frequent deadlocks waste a lot of effort.
+
+## 6. Performance: the big downside
+
+This is why not everyone has used 2PL since the 1970s: **throughput and query response times are much worse** than with weak isolation.
+
+| Cause | Detail |
+|---|---|
+| Lock overhead | Acquiring and releasing all those locks |
+| **Reduced concurrency** (the main cause) | Anything that *might* cause a race makes one transaction **wait** for the other |
+| **No limit on waiting** | Traditional databases allow long, interactive transactions, so a wait can last a long time. **Queues** form behind a popular object |
+| **Unstable latency** | Very slow at **high percentiles** (e.g. p99) when there's contention. One slow transaction, or one that locks a lot of data, can make the whole system **grind to a halt** |
+| **Deadlock retries** | Aborted transactions must redo all their work |
