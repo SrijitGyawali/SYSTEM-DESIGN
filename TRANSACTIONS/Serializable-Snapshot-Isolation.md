@@ -131,3 +131,14 @@ Txn 43: COMMIT → 42's conflicting write has already committed → ABORT ❌
 ### Interview one-liners
 - **SSI:** "Optimistic concurrency control. Transactions run on a snapshot without locks, and at commit the database aborts any transaction whose reads were invalidated by a committed write. Serializable with little overhead, but it struggles under high contention."
 - **Pessimistic vs optimistic:** "Pessimistic waits whenever a conflict is possible, like 2PL. Optimistic carries on and checks at commit, aborting if there was a conflict, like SSI."
+
+### Self-check questions
+1. Which problems of 2PL, serial execution and weak isolation does SSI solve?
+2. What's the difference between pessimistic and optimistic concurrency control?
+3. When does optimistic concurrency perform badly? How do commutative operations help?
+4. What is an "outdated premise"?
+5. How does SSI detect stale MVCC reads? Why does it wait until commit to abort?
+6. How does SSI detect writes that affect earlier reads? How is a tripwire different from a 2PL lock?
+7. In the doctors example, which transaction commits, which aborts, and why?
+8. What's the trade-off in how precisely reads and writes are tracked?
+9. Compare serial execution, 2PL and SSI.
