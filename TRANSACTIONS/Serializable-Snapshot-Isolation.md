@@ -76,3 +76,21 @@ Txn 43: COMMIT? → the write it ignored has now committed
 - If transaction 43 is **read-only**, there's no risk of write skew, so it doesn't need to abort. At read time, the database doesn't know yet whether 43 will write later.
 - Transaction 42 might still **abort**, or still be **uncommitted** when 43 commits, so the read may turn out not to be stale after all.
 - Avoiding unnecessary aborts keeps snapshot isolation's main strength: **long-running reads from a consistent snapshot**.
+
+## 7. Case 2: detecting writes that affect prior reads
+
+This uses something like [index-range locks](Two-Phase-Locking.md#8-index-range-locks-next-key-locking-the-practical-version), except these locks **don't block**. They act as **tripwires**.
+
+```
+Txn 42: SELECT on-call WHERE shift_id = 1234  → index notes "42 read shift 1234"
+Txn 43: SELECT on-call WHERE shift_id = 1234  → index notes "43 read shift 1234"
+Txn 42: UPDATE Alice → sees 43 read this data → tells 43 "your read may be outdated"
+Txn 43: UPDATE Bob   → sees 42 read this data → tells 42 "your read may be outdated"
+Txn 42: COMMIT ✅   (43's write hasn't committed yet, so it doesn't count)
+Txn 43: COMMIT → 42's conflicting write has already committed → ABORT ❌
+```
+
+- Reads are recorded on the **index entry** (e.g. `shift_id = 1234`), or at **table level** if there's no index.
+- The database only needs to remember this until the transaction **and all transactions running at the same time** have finished.
+- When a transaction **writes**, it looks in the index for other transactions that recently **read** the affected data. Instead of blocking, it **notifies** them that their data may be out of date.
+- The **first transaction to commit wins**. The later one aborts and must retry.
