@@ -41,3 +41,17 @@ It's an old idea whose pros and cons have been debated for a long time.
 
 - All reads in a transaction come from a **consistent snapshot** using MVCC, exactly like [snapshot isolation](Snapshot-Isolation.md). This is the main difference from older optimistic techniques.
 - On top of that, SSI adds an **algorithm that detects serialization conflicts** among writes and decides **which transactions to abort**.
+
+## 5. The core problem: decisions based on an outdated premise
+
+Recall the [write skew pattern](Write-Skew-and-Phantoms.md#5-the-pattern-behind-all-write-skew): **read → decide → write**.
+
+- The read result is a **premise**, a fact that was true when the transaction started (e.g. "there are currently 2 doctors on call").
+- By commit time, another transaction may have changed the data, so the **premise may no longer be true**.
+- The database doesn't know how your code uses a query result. To be safe, it must **assume that any change to the premise may make the transaction's writes invalid**.
+
+➡️ SSI must detect when a transaction **may have acted on an outdated premise** and **abort** it.
+
+There are two cases to detect:
+1. **Stale MVCC read:** another transaction's uncommitted write happened **before** the read, and the read ignored it.
+2. **Write after read:** another transaction writes to the data **after** it was read.
