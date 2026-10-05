@@ -55,3 +55,18 @@ Recall the [write skew pattern](Write-Skew-and-Phantoms.md#5-the-pattern-behind-
 There are two cases to detect:
 1. **Stale MVCC read:** another transaction's uncommitted write happened **before** the read, and the read ignored it.
 2. **Write after read:** another transaction writes to the data **after** it was read.
+
+## 6. Case 1: detecting stale MVCC reads
+
+```
+Txn 42: UPDATE Alice SET on_call = false     (not committed yet)
+Txn 43: SELECT on-call doctors → sees Alice on_call = true
+                                  (MVCC ignores 42's uncommitted write)
+Txn 42: COMMIT ✅
+Txn 43: UPDATE Bob SET on_call = false
+Txn 43: COMMIT? → the write it ignored has now committed
+                → its premise is false → ABORT ❌
+```
+
+- The database **tracks** whenever a transaction **ignores another transaction's writes** because of MVCC visibility rules.
+- At **commit**, it checks whether any of those ignored writes **have since committed**. If so, the transaction **aborts**.
