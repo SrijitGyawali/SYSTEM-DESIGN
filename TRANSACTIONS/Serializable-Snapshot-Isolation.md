@@ -70,3 +70,9 @@ Txn 43: COMMIT? → the write it ignored has now committed
 
 - The database **tracks** whenever a transaction **ignores another transaction's writes** because of MVCC visibility rules.
 - At **commit**, it checks whether any of those ignored writes **have since committed**. If so, the transaction **aborts**.
+
+### Why wait until commit instead of aborting right away?
+
+- If transaction 43 is **read-only**, there's no risk of write skew, so it doesn't need to abort. At read time, the database doesn't know yet whether 43 will write later.
+- Transaction 42 might still **abort**, or still be **uncommitted** when 43 commits, so the read may turn out not to be stale after all.
+- Avoiding unnecessary aborts keeps snapshot isolation's main strength: **long-running reads from a consistent snapshot**.
