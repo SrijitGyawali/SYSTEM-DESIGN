@@ -120,8 +120,8 @@ The researchers' answer since the 1970s: **use serializable isolation**. The res
 
 Three ways to implement it:
 1. **Actual serial execution** → [Actual-Serial-Execution.md](Actual-Serial-Execution.md)
-2. **Two-phase locking (2PL)**
-3. **Serializable snapshot isolation (SSI)**
+2. **Two-phase locking (2PL)** → [Two-Phase-Locking.md](Two-Phase-Locking.md)
+3. **Serializable snapshot isolation (SSI)** → [Serializable-Snapshot-Isolation.md](Serializable-Snapshot-Isolation.md)
 
 ## 9. Conclusion
 
