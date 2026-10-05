@@ -36,3 +36,8 @@ It's an old idea whose pros and cons have been debated for a long time.
 - ❌ **High contention** (many transactions touching the same objects) leads to **many aborts**. If the system is already near its maximum throughput, the retries add even more load and make performance **worse**.
 - ✅ With **spare capacity and low contention**, optimistic techniques usually **perform better** than pessimistic ones.
 - **Reduce contention with commutative atomic operations.** If many transactions increment the same counter, the order doesn't matter, so the increments don't conflict (as long as the transaction doesn't also read the counter).
+
+## 4. SSI = snapshot isolation + conflict detection
+
+- All reads in a transaction come from a **consistent snapshot** using MVCC, exactly like [snapshot isolation](Snapshot-Isolation.md). This is the main difference from older optimistic techniques.
+- On top of that, SSI adds an **algorithm that detects serialization conflicts** among writes and decides **which transactions to abort**.
