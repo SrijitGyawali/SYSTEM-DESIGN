@@ -60,3 +60,17 @@ Every object in the database has a lock, which can be held in one of two modes:
 
 1. **Phase 1:** while the transaction runs, it **acquires** locks and never releases any.
 2. **Phase 2:** at the end (commit or abort), it **releases all** of them.
+
+## 5. Deadlocks
+
+With so many locks, transactions can easily get stuck waiting for each other:
+
+```
+Txn A: holds lock on X, wants Y  ──▶ waits for B
+Txn B: holds lock on Y, wants X  ──▶ waits for A
+                ⟳  neither can move = deadlock
+```
+
+- The database **detects deadlocks automatically** and **aborts one** of the transactions so the others can continue.
+- The **application must retry** the aborted transaction.
+- Deadlocks can happen with lock-based read committed too, but they happen **much more often under 2PL**. Each retry redoes all the work, so frequent deadlocks waste a lot of effort.
