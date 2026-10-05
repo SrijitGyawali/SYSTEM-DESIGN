@@ -1,7 +1,7 @@
 # Actual Serial Execution — Revision Notes
 
 > Source: *Designing Data-Intensive Applications* (Martin Kleppmann), Chapter 7, "Actual Serial Execution" (pp. 252–256).
-> Related: [ACID.md](ACID.md) · [Snapshot-Isolation.md](Snapshot-Isolation.md) · [Write-Skew-and-Phantoms.md](Write-Skew-and-Phantoms.md)
+> Related: [ACID.md](ACID.md) · [Snapshot-Isolation.md](Snapshot-Isolation.md) · [Write-Skew-and-Phantoms.md](Write-Skew-and-Phantoms.md) · [Two-Phase-Locking.md](Two-Phase-Locking.md) · [Serializable-Snapshot-Isolation.md](Serializable-Snapshot-Isolation.md)
 
 ## 1. The idea
 
