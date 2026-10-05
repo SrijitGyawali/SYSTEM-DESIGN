@@ -142,3 +142,14 @@ Predicate locks are **slow**: checking every write against many active predicate
 
 ### Interview one-liner
 > "2PL takes shared locks for reads and exclusive locks for writes and holds them until commit, so readers and writers block each other. Predicate or index-range locks stop phantoms. It's fully serializable but slow, with deadlocks and unpredictable latency."
+
+### Self-check questions
+1. How is 2PL different from the row locks used in read committed?
+2. Explain shared vs exclusive locks. When does each one block?
+3. Why is it called "two-phase"?
+4. What is a deadlock, and how does the database handle it?
+5. Why is 2PL's performance poor and its latency unstable?
+6. What is a predicate lock, and how does it stop phantoms?
+7. Why do databases use index-range locks instead? What's the fallback when there's no index?
+8. Why is 2PL called pessimistic? Why is serial execution "pessimistic to the extreme"?
+9. What's the difference between 2PL and 2PC?
